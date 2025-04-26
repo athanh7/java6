@@ -1,0 +1,73 @@
+package com.poly.shopme.controller;
+
+
+
+import org.springframework.beans.factory.annotation.Autowired;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import org.springframework.web.servlet.mvc.support.RedirectAttributesModelMap;
+
+import com.poly.shopme.model.SanPham;
+
+import com.poly.shopme.service.SanPhamService;
+
+@Controller
+@RequestMapping("/manage")
+public class QLSanPhamController {
+
+    @Autowired
+    private SanPhamService sanPhamService;
+
+    @GetMapping("/add")
+    public String addSanPham(Model model) {
+        SanPham sanphams = new SanPham();
+        model.addAttribute("sanphams", sanphams);
+        return "addsanpham";
+    }
+
+    @PostMapping("/add")
+    public String addSanPham(Model model, @ModelAttribute("sanphams") SanPham sanPham) {
+        sanPhamService.add(sanPham);
+        model.addAttribute("message", "them thanh cong");
+        return "qlsanpham";
+    }
+
+    @GetMapping("/list")
+    public String showSanPham(Model model) {
+        var sanphams = sanPhamService.findAll();
+        model.addAttribute("sanphams", sanphams);
+        return "qlsanpham";
+    }
+
+    @PostMapping("/saveSanPham")
+    public String saveOrUpdate(RedirectAttributesModelMap model, SanPham sanPham) {
+        sanPhamService.add(sanPham);
+        model.addFlashAttribute("message", "Cập nhật thành công!");
+        return "redirect:/manage/list";
+    }
+
+
+     @GetMapping("/edit/{maSanPham}")
+    public String edit(Model model, @PathVariable("maSanPham") String maSanPham) {
+        SanPham sanphams = sanPhamService.findById(maSanPham);
+        model.addAttribute("sanphams", sanphams);
+        return "addsanpham";
+    }
+
+    @GetMapping("/delete/{maSanPham}")
+    public String delete(RedirectAttributesModelMap model, @PathVariable("maSanPham") String maSanPham) {
+        sanPhamService.delete(maSanPham);
+        model.addAttribute("message", "The category has been deleted successfully");
+        return "redirect:/manage/list";
+    }
+
+
+ 
+}
