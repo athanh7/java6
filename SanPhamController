@@ -1,0 +1,64 @@
+package com.poly.shopme.controller;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+// import org.springframework.web.bind.annotation.ResponseStatus;
+
+// import com.poly.shopme.model.SanPham;
+import com.poly.shopme.service.SanPhamService;
+
+@Controller
+@RequestMapping("/sanphams")
+public class SanPhamController {
+    @Autowired
+    private SanPhamService sanPhamService;
+
+    // @RequestMapping("/add")
+    // @ResponseStatus
+    // public String addSanPham(Model model) {
+    //     SanPham sp = new SanPham();
+    //     sp.setMaSanPham("IP002");
+    //     sp.setTenSanPham("NOKIA ");
+    //     sp.setAnh("nokia.png");
+    //     sp.setLoai("CucGach");
+    //     sp.setGia(100000.00);
+    //     sp.setSoLuong(13);
+    //     sanPhamService.add(sp);
+
+    //     return "hihih";
+    // }
+
+    @GetMapping("/list")
+    public String list(Model model) {
+        var sanphams = sanPhamService.findAll();
+        model.addAttribute("sanphams", sanphams);
+        return "home";
+    }
+
+    // @GetMapping("/page")
+    // public String page(Model model,
+    //         @PageableDefault( direction = Direction.ASC, page = 0, sort = "tenSanPham") Pageable pageable) {
+    //     var sanphamPage = sanPhamService.findAll(pageable);
+    //     model.addAttribute("sanphamPage", sanphamPage);
+    //     return "home2";
+
+    // }
+
+    @PostMapping("/search")
+    public String search(Model model, @RequestParam(name = "searchNameSP", required = false) String searchNameSP,
+            @PageableDefault( direction = Direction.ASC, page = 0, sort = "tenSanPham") Pageable pageable) {
+        System.out.println("searchNameSP : " + searchNameSP);  
+        var sanphamPage = sanPhamService.searchName("%" + searchNameSP + "%", pageable);
+        model.addAttribute("sanphamPage", sanphamPage);
+        return "home2";
+    }
+
+}
