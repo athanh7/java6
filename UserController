@@ -1,0 +1,125 @@
+package com.poly.shopme.controller;
+
+// import java.time.LocalDate;
+
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+// import org.springframework.web.bind.annotation.ResponseStatus;
+
+import org.springframework.web.servlet.mvc.support.RedirectAttributesModelMap;
+
+import com.poly.shopme.model.User;
+import com.poly.shopme.service.UserService;
+
+import jakarta.servlet.http.HttpSession;
+
+@Controller
+@RequestMapping("/users")
+public class UserController {
+    @Autowired
+    private UserService userService;
+
+    // @GetMapping("/add")
+    // @ResponseStatus
+    // public String addUser(Model model) {
+    //     User user = new User();
+    //     user.setTenDangNhap("skyne");
+    //     user.setMatKhau("st123");
+    //     user.setTenNguoiDung("Nguyen Thanh Tung");
+    //     user.setNgaySinh(LocalDate.parse("2005-02-25"));
+    //     user.setEmail("skydeptrai2k6@gmail.com");
+    //     user.setSdt("0325624202");
+    //     user.setAnh("sky.png");
+    //     user.setVaiTro("admin");
+    //     userService.add(user);
+    //     return "hihih";
+    // }
+
+    // @GetMapping("/list")
+    // public String list(Model model) {
+    // var users = userService.findAll();
+    // model.addAttribute("users", users);
+    // return "profile";
+    // }
+
+
+    @GetMapping("/register")
+    public String add(Model model){
+        User user = new User();
+        user.setVaiTro("user");
+        model.addAttribute("user", user);
+        return "register";
+    }
+    @PostMapping("/register")
+    public String add(Model model, @ModelAttribute("user") User user) {
+        if (userService.existsByTenDangNhap(user.getTenDangNhap())) {
+            model.addAttribute("error", "Tên đăng nhập đã tồn tại!");
+            return "register";
+        }
+        
+        userService.add(user);
+        return "login"; 
+    }
+    
+
+    @GetMapping("/dangnhap")
+    public String showLoginForm(Model model) {
+        User user = new User();
+        model.addAttribute("user", user);
+        return "login";
+    }
+
+    @PostMapping("/dangnhap")
+    public String processLogin(User user, Model model, HttpSession session) {
+        User existingUser = userService.findById(user.getTenDangNhap());
+        if (existingUser != null && existingUser.getMatKhau().equals(user.getMatKhau())) {
+            session.setAttribute("logIndexUser", existingUser);
+            if ("admin".equals(existingUser.getVaiTro())) {
+                return "redirect:/index/admin";
+            } else if ("user".equals(existingUser.getVaiTro())) {
+                return "redirect:/sanphams/list";
+            }
+        }
+        model.addAttribute("error", "Sai tài khoản hoặc mật khẩu!");
+        return "login";
+    }
+
+    // @GetMapping("/edit/{tenDangNhap}")
+    // public String edit(Model model, @PathVariable("tenDangNhap") String tenDangNhap) {
+    //     User user = userService.findById(tenDangNhap);
+    //     model.addAttribute("user", user);
+    //     return "profile";
+    // }
+    
+    // @PostMapping("/saveOrUpdate")
+    // public String saveOrUpdate(RedirectAttributesModelMap model, User user) {
+    //     userService.add(user);
+    //     model.addAttribute("message", "hihihihi ");
+    //     return "profile";
+    // }
+
+   //edituseruser
+    @GetMapping("/edit/{tenDangNhap}")
+public String edit(Model model, @PathVariable("tenDangNhap") String tenDangNhap) {
+    User user = userService.findById(tenDangNhap);
+    model.addAttribute("user", user);
+    return "edituser";
+
+}
+    //luu khi edit thanh cong
+    
+@PostMapping("/saveOrUpdate")
+public String saveOrUpdate(RedirectAttributesModelMap model, User user) {
+    userService.add(user);
+    model.addFlashAttribute("message", "Cập nhật thành công!");
+    return "profile";
+}
+
+}
